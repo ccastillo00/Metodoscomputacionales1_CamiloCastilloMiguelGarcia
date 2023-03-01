@@ -1,0 +1,19 @@
+Tomando en cuenta que $n_0 sin(alpha_0) = n_1 sin(alpha_1)$ 
+Ademas: 
+$$\frac{csin(alpha_0)}{v_0}=\frac{(csin(alpha_1))}/{v_1}$$ y que $$n=\frac{c}{v}$$ 
+
+Tenemos que para conseguir $x_{aire}$ y $x_{agua}$ tomando en cuenta las propiedades de los angulos seran iguales a: 
+$$x_{aire}=\sqrt{[x-T(0)]_{}^{2}+(T(1)_{}^{2})]}$$
+y 
+$$x_{agua}=\sqrt{[x-R(0)]_{}^{2}+(R(1)_{}^{2})]}$$
+
+
+Tambien conocemos que $t = \frac{x}{v}$
+
+Reemplazando, sabiendo que $C_{aire}=\frac{c}{n_1}$ respectivamiente 
+
+Tendremos que $$T =\frac{\sqrt{[x-T(0)]_{}^{2}+(T(1)_{}^{2})]}}{\frac{c}{n_0}}+\frac{\sqrt{[x-R(0)]_{}^{2}+(R(1)_{}^{2})]}}{\frac{c}{n_1}}$$
+
+Por lo tanto:
+
+$$cT ={n_0\sqrt{[x-T(0)]_{}^{2}+(T(1)_{}^{2})]}}+n_1{\sqrt{[x-R(0)]_{}^{2}+(R(1)_{}^{2})]}}$$

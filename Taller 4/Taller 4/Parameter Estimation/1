@@ -1,0 +1,232 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "id": "29c2d62d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 25,
+   "id": "e45000cc",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "url = 'https://raw.githubusercontent.com/asegura4488/Database/main/MetodosComputacionalesReforma/Gaussiano.csv'\n",
+    "data = pd.read_csv(url)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 26,
+   "id": "739dae64",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def p(x):\n",
+    "    mu, sigma = x\n",
+    "    if 3 <= mu <= 5 and 0.5 <= sigma <= 3.5:\n",
+    "        return 1\n",
+    "    else:\n",
+    "        return 0"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 27,
+   "id": "8ab2ff67",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def likelihood_gaussian(x, mu, sigma):\n",
+    "    N = len(x)\n",
+    "    exponent = -np.sum((x - mu)**2 / (2 * sigma**2))\n",
+    "    normalization = -0.5 * N * np.log(2 * np.pi * sigma**2)\n",
+    "    return exponent + normalization"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 28,
+   "id": "88cb1a24",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def prior_uniform(mu, sigma):\n",
+    "    if 3 <= mu <= 5 and 0.5 <= sigma <= 3.5:\n",
+    "        return 1\n",
+    "    else:\n",
+    "        return 0"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "id": "1afc6eee",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "initial_mu = 4\n",
+    "initial_sigma = 2\n",
+    "N = 2 * 10**4\n",
+    "acceptances = 0\n",
+    "rejections = 0\n",
+    "mu_current = initial_mu\n",
+    "sigma_current = initial_sigma\n",
+    "\n",
+    "mu_samples = []\n",
+    "sigma_samples = []"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 30,
+   "id": "211f7b2a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def log_posterior(x, mu, sigma):\n",
+    "    return likelihood_gaussian(x, mu, sigma) + np.log(prior_uniform(mu, sigma))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 31,
+   "id": "9bab3fd9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for i in range(N):\n",
+    "    mu_candidate = np.random.normal(mu_current, 0.1)\n",
+    "    sigma_candidate = np.random.normal(sigma_current, 0.1)\n",
+    "    log_posterior_candidate = log_posterior(data, mu_candidate, sigma_candidate)\n",
+    "    log_posterior_current = log_posterior(data, mu_current, sigma_current)\n",
+    "\n",
+    "    acceptance_ratio = np.exp(log_posterior_candidate - log_posterior_current)\n",
+    "    random_number = np.random.uniform()\n",
+    "\n",
+    "    if random_number < acceptance_ratio.item():  \n",
+    "        mu_current = mu_candidate\n",
+    "        sigma_current = sigma_candidate\n",
+    "        acceptances += 1\n",
+    "    else:\n",
+    "        rejections += 1\n",
+    "    mu_samples.append(mu_current)\n",
+    "    sigma_samples.append(sigma_current)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 32,
+   "id": "ac4d83bc",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Número de aceptaciones: 13788\n",
+      "Número de rechazos: 6212\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(\"Número de aceptaciones:\", acceptances)\n",
+    "print(\"Número de rechazos:\", rejections)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 34,
+   "id": "e80fbda6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "estimated_mu = np.mean(mu_samples)\n",
+    "estimated_sigma = np.mean(sigma_samples)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 36,
+   "id": "20938289",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Mejor valor estimado de µ: 4.004916462972697\n",
+      "Mejor valor estimado de σ: 1.8355218551102892\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(\"Mejor valor estimado de µ:\", estimated_mu)\n",
+    "print(\"Mejor valor estimado de σ:\", estimated_sigma)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 38,
+   "id": "7f828429",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sigma_lower = np.percentile(sigma_samples, 16)\n",
+    "sigma_upper = np.percentile(sigma_samples, 84)\n",
+    "\n",
+    "\n",
+    "error_sigma_minus = estimated_sigma - sigma_lower\n",
+    "error_sigma_plus = sigma_upper - estimated_sigma"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 40,
+   "id": "39ace35b",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Error σ-: 0.12859773929304286\n",
+      "Error σ+: 0.1285903338680927\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(\"Error σ-:\", error_sigma_minus)\n",
+    "print(\"Error σ+:\", error_sigma_plus)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.9.13"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
